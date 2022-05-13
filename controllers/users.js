@@ -24,12 +24,11 @@ const getUserById = async (req, res) => {
       res.status(404).send('Not Found');
     }
     res.send(user);
-
   } catch (error) {
     console.log('Error happened in getUserById', error);
     res.status(500).send('Something went wrong');
   }
-}
+};
 
 module.exports = {
   getUsers,
