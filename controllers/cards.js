@@ -11,7 +11,7 @@ const getCards = async (req, res) => {
     res.send(cards);
   } catch (error) {
     console.log('Error happened in getCards', error);
-    res.status(500).send('Something went wrong');
+    res.status(500).send({ message: 'Something went wrong' });
   }
 };
 
