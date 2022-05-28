@@ -1,12 +1,8 @@
-const path = require('path');
-
-const { getJsonFromFile } = require('../helpers/files');
-
-const usersFilePath = path.join(__dirname, '..', 'data', 'users.json');
+const User = require('../models/user');
 
 const getUsers = async (req, res) => {
   try {
-    const users = await getJsonFromFile(usersFilePath);
+    const users = await User.find({});
 
     res.send(users);
   } catch (error) {
@@ -17,20 +13,74 @@ const getUsers = async (req, res) => {
 
 const getUserById = async (req, res) => {
   try {
-    const users = await getJsonFromFile(usersFilePath);
-    const user = users.find(user => user._id === req.params.user_id);
+    const user = await User.findById(req.params.user_id)
+      .orFail();
 
     if (!user) {
       res.status(404).send({ message: 'User ID not found' });
+    } else {
+      res.send(user);
     }
-    res.send(user);
-  } catch (error) {
-    console.log('Error happened in getUserById', error);
-    res.status(500).send({ message: 'Something went wrong' });
+  } catch (err) {
+    if (err.name === 'ValidationError') {
+      res.status(400).send({ message: 'Not a valid user id' });
+    } else {
+      res.status(500).send({ message: 'Something went wrong' });
+    }
+  }
+};
+
+const createUser = async (req, res) => {
+  const { name, about, avatar } = req.body;
+  try {
+    const newUser = await User.create({ name, about, avatar });
+
+    res.send(newUser);
+  } catch (err) {
+    if (err.name === 'ValidationError') {
+      res.status(400).send({ message: 'Not a valid user' });
+    } else {
+      res.status(500).send({ message: 'Something went wrong' });
+    }
+  }
+};
+
+const updateProfile = async (req, res) => {
+  const { name, about } = req.body;
+  try {
+    const newProfile = await User.findByIdAndUpdate({ name, about })
+      .orFail();
+
+    res.send(newProfile);
+  } catch (err) {
+    if (err.name === 'ValidationError') {
+      res.status(400).send({ message: 'Not a valid user profile' });
+    } else {
+      res.status(500).send({ message: 'Something went wrong' });
+    }
+  }
+};
+
+const updateAvatar = async (req, res) => {
+  const { avatar } = req.body;
+  try {
+    const newAvatar = await User.findByIdAndUpdate({ avatar })
+      .orFail();
+
+    res.send(newAvatar);
+  } catch (err) {
+    if (err.name === 'ValidationError') {
+      res.status(400).send({ message: 'Not a valid user avatar' });
+    } else {
+      res.status(500).send({ message: 'Something went wrong' });
+    }
   }
 };
 
 module.exports = {
   getUsers,
   getUserById,
+  createUser,
+  updateProfile,
+  updateAvatar,
 };

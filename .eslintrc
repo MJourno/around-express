@@ -27,6 +27,14 @@
       {
         "ignoreOnInitialization": true
       }
+    ],
+    "object-shorthand": [
+      "error",
+      "consistent-as-needed"
+    ],
+    "func-names": [
+      "error",
+      "as-needed"
     ]
   }
 }
