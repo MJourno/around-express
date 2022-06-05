@@ -18,17 +18,19 @@ const createNewCard = async (req, res) => {
     const newCard = await Card.create({ name: name, link: link, owner: req.user._id });
 
     res.send(newCard);
-  } catch (error) {
-    console.log('Error happened in createNewCard', error);
-    res.status(500).send({ message: 'Something went wrong' });
+  } catch (err) {
+    if (err.name === 'ValidationError') {
+      res.status(400).send({ message: 'Not a valid user id' });
+    } else {
+      res.status(500).send({ message: 'Something went wrong' });
+    }
   }
 };
 
 const deleteCard = async (req, res) => {
   console.log(req.params);
   try {
-    const cardById = await Card.findByIdAndRemove(req.params.card_id)
-      .orFail();
+    const cardById = await Card.findByIdAndRemove(req.params.card_id);
     if (cardById) {
       res.send(cardById);
     } else {
@@ -46,13 +48,14 @@ const likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
-    .orFail()
     .then(card => res.send({ data: card }))
     .catch(err => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Not a valid card id' });
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'NotValid Data' });
+      } if (err.name === 'DocumentNotFoundError') {
+        res.status(404).send({ message: 'User not found' });
       } else {
-        res.status(500).send({ message: 'Something went wrong' });
+        res.status(500).send({ message: 'An error has occurred on the server' });
       }
     });
 };
@@ -63,13 +66,14 @@ const unLikeCard = async (req, res) => {
     { $pull: { likes: req.user._id } }, // remove _id from the array
     { new: true },
   )
-    .orFail()
     .then(card => res.send({ data: card }))
     .catch(err => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Not a valid card id' });
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'NotValid Data' });
+      } if (err.name === 'DocumentNotFoundError') {
+        res.status(404).send({ message: 'User not found' });
       } else {
-        res.status(500).send({ message: 'Something went wrong' });
+        res.status(500).send({ message: 'An error has occurred on the server' });
       }
     });
 };

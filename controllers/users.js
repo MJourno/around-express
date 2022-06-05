@@ -13,19 +13,19 @@ const getUsers = async (req, res) => {
 
 const getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.user_id)
-      .orFail();
-
+    const user = await User.findById(req.params.user_id);
     if (!user) {
       res.status(404).send({ message: 'User ID not found' });
     } else {
       res.send(user);
     }
   } catch (err) {
-    if (err.name === 'ValidationError') {
-      res.status(400).send({ message: 'Not a valid user id' });
+    if (err.name === 'CastError') {
+      res.status(400).send({ message: 'NotValid Data' });
+    } if (err.name === 'DocumentNotFoundError') {
+      res.status(404).send({ message: 'User not found' });
     } else {
-      res.status(500).send({ message: 'Something went wrong' });
+      res.status(500).send({ message: 'An error has occurred on the server' });
     }
   }
 };
@@ -48,7 +48,7 @@ const createUser = async (req, res) => {
 const updateProfile = async (req, res) => {
   const { name, about } = req.body;
   try {
-    const newProfile = await User.findByIdAndUpdate({ name, about })
+    const newProfile = await User.findByIdAndUpdate({ name, about }, { new: true })
       .orFail();
 
     res.send(newProfile);
@@ -64,7 +64,7 @@ const updateProfile = async (req, res) => {
 const updateAvatar = async (req, res) => {
   const { avatar } = req.body;
   try {
-    const newAvatar = await User.findByIdAndUpdate({ avatar })
+    const newAvatar = await User.findByIdAndUpdate({ avatar }, { new: true })
       .orFail();
 
     res.send(newAvatar);
