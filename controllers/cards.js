@@ -36,9 +36,12 @@ const deleteCard = async (req, res) => {
     } else {
       res.status(404).send({ message: 'Card ID not found' });
     }
-  } catch (error) {
-    console.log('Error happened in deleteCard', error);
-    res.status(500).send({ message: 'Something went wrong' });
+  } catch (err) {
+    if (err.name === 'ValidationError') {
+      res.status(400).send({ message: 'Not a valid user id' });
+    } else {
+      res.status(500).send({ message: 'Something went wrong' });
+    }
   }
 };
 
